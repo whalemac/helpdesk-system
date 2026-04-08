@@ -125,16 +125,30 @@
 
                 <div class="pt-4 border-t border-gray-100">
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Assigned Agent</label>
-                    <div class="flex items-center gap-3">
-                        @if($ticket->assignedUser)
-                            <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-700 text-xs">
-                                {{ substr($ticket->assignedUser->name, 0, 1) }}
-                            </div>
-                            <div class="text-sm font-medium text-gray-900">{{ $ticket->assignedUser->name }}</div>
-                        @else
-                            <div class="text-sm text-gray-500 border border-dashed border-gray-300 rounded px-3 py-1.5 bg-gray-50 italic">Unassigned</div>
-                        @endif
-                    </div>
+                    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'supervisor')
+                        <form action="{{ route('tickets.assign', $ticket) }}" method="POST">
+                            @csrf @method('PATCH')
+                            <select name="assigned_user_id" onchange="this.form.submit()" class="block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm sm:leading-6 font-medium bg-gray-50">
+                                <option value="">Unassigned</option>
+                                @foreach($agents as $agent)
+                                    <option value="{{ $agent->id }}" {{ $ticket->assigned_user_id == $agent->id ? 'selected' : '' }}>
+                                        {{ $agent->name }} ({{ ucfirst($agent->role) }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </form>
+                    @else
+                        <div class="flex items-center gap-3">
+                            @if($ticket->assignedUser)
+                                <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-700 text-xs">
+                                    {{ substr($ticket->assignedUser->name, 0, 1) }}
+                                </div>
+                                <div class="text-sm font-medium text-gray-900">{{ $ticket->assignedUser->name }}</div>
+                            @else
+                                <div class="text-sm text-gray-500 border border-dashed border-gray-300 rounded px-3 py-1.5 bg-gray-50 italic">Unassigned</div>
+                            @endif
+                        </div>
+                    @endif
                 </div>
 
                 <div class="pt-4 border-t border-gray-100">

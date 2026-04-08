@@ -65,6 +65,22 @@ class TicketController extends Controller
         return redirect()->back()->with('success', 'Ticket status updated.');
     }
 
+    public function assign(Request $request, Ticket $ticket)
+    {
+        // Only Admin and Supervisor can reassign tickets
+        if (!in_array(auth()->user()->role, ['admin', 'supervisor'])) {
+            abort(403, 'Only Supervisors and Admins can reassign tickets.');
+        }
+
+        $request->validate([
+            'assigned_user_id' => 'nullable|exists:users,id',
+        ]);
+
+        $ticket->update(['assigned_user_id' => $request->assigned_user_id]);
+
+        return redirect()->back()->with('success', 'Ticket reassigned successfully.');
+    }
+
     public function show(Ticket $ticket)
     {
         // Simple authorization check based on role

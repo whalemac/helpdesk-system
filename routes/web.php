@@ -21,7 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::prefix('requesters')->name('requesters.')->group(function () {
+    Route::middleware('role:admin')->prefix('requesters')->name('requesters.')->group(function () {
         Route::get('/', [RequesterController::class, 'index'])->name('index');
         Route::get('/create', [RequesterController::class, 'create'])->name('create');
         Route::post('/', [RequesterController::class, 'store'])->name('store');
@@ -34,13 +34,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [App\Http\Controllers\TicketController::class, 'store'])->name('store');
         Route::get('/{ticket}', [App\Http\Controllers\TicketController::class, 'show'])->name('show');
         Route::patch('/{ticket}/status', [App\Http\Controllers\TicketController::class, 'updateStatus'])->name('update-status');
+        Route::patch('/{ticket}/assign', [App\Http\Controllers\TicketController::class, 'assign'])->name('assign');
         
         Route::post('/{ticket}/replies', [App\Http\Controllers\TicketReplyController::class, 'store'])->name('replies.store');
     });
 
-    Route::prefix('categories')->name('categories.')->group(function () {
+    Route::middleware('role:admin')->prefix('categories')->name('categories.')->group(function () {
         Route::get('/', [CategoryController::class, 'index'])->name('index');
         Route::post('/', [CategoryController::class, 'store'])->name('store');
+    });
+
+    Route::middleware('role:admin,supervisor')->prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [App\Http\Controllers\ReportController::class, 'index'])->name('index');
     });
 });
 
