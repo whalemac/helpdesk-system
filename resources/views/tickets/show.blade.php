@@ -3,11 +3,16 @@
 @section('header', 'Ticket Details')
 
 @section('content')
-<div class="mb-6">
+<div class="mb-6 flex items-center justify-between">
     <a href="{{ route('tickets.index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-900 flex items-center gap-1 transition">
         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
         Back to Queue
     </a>
+    @if(auth()->user()->role !== 'requester' && $ticket->status !== 'closed')
+    <a href="{{ route('tickets.edit', $ticket) }}" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition">
+        Edit Ticket
+    </a>
+    @endif
 </div>
 
 <div class="flex flex-col lg:flex-row gap-8 items-start">
@@ -68,17 +73,33 @@
             <div class="bg-blue-50/50 px-6 py-4 border-b border-blue-100">
                 <h3 class="text-sm font-semibold text-blue-900">Post a Reply</h3>
             </div>
+            @if($ticket->status === 'closed')
+                <div class="p-6 text-sm text-gray-500 italic text-center">
+                    This ticket is closed. Replies are disabled.
+                </div>
+            @else
             <form action="{{ route('tickets.replies.store', $ticket) }}" method="POST" class="p-6">
                 @csrf
                 <textarea name="message" rows="4" required placeholder="Type your response here..." class="block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"></textarea>
                 
                 <div class="mt-4 flex items-center justify-between">
-                    <div class="text-xs text-gray-500">Responses are visible to the requester.</div>
+                    <div class="flex items-center gap-4">
+                        <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Reply Type:</label>
+                        <label class="flex items-center gap-1.5 text-sm text-gray-700">
+                            <input type="radio" name="reply_type" value="public" checked class="text-blue-600"> Public
+                        </label>
+                        @if(auth()->user()->role !== 'requester')
+                        <label class="flex items-center gap-1.5 text-sm text-gray-700">
+                            <input type="radio" name="reply_type" value="internal" class="text-blue-600"> Internal Note
+                        </label>
+                        @endif
+                    </div>
                     <button type="submit" class="rounded-md bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition">
                         Send Message
                     </button>
                 </div>
             </form>
+            @endif
         </div>
     </div>
 

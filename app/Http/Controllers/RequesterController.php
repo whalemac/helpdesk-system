@@ -21,11 +21,11 @@ class RequesterController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'email' => 'required|email|unique:requesters',
-            'phone' => 'required',
-            'department' => 'nullable',
+            'first_name' => 'required|string|max:255',
+            'last_name'  => 'required|string|max:255',
+            'email'      => 'required|email|unique:requesters,email',
+            'phone'      => 'required|string|max:20',
+            'department' => 'nullable|string|max:255',
         ]);
 
         Requester::create($request->all());
@@ -35,6 +35,39 @@ class RequesterController extends Controller
 
     public function show(Requester $requester)
     {
+        $requester->load('tickets');
         return view('requesters.show', compact('requester'));
+    }
+
+    public function edit(Requester $requester)
+    {
+        return view('requesters.edit', compact('requester'));
+    }
+
+    public function update(Request $request, Requester $requester)
+    {
+        $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name'  => 'required|string|max:255',
+            'email'      => 'required|email|unique:requesters,email,' . $requester->id,
+            'phone'      => 'required|string|max:20',
+            'department' => 'nullable|string|max:255',
+        ]);
+
+        $requester->update($request->all());
+
+        return redirect()->route('requesters.show', $requester)->with('success', 'Requester updated.');
+    }
+
+    public function destroy(Requester $requester)
+    {
+        if ($requester->tickets()->count() > 0) {
+            return redirect()->route('requesters.index')
+                ->with('error', 'Cannot delete a requester with existing tickets.');
+        }
+
+        $requester->delete();
+
+        return redirect()->route('requesters.index')->with('success', 'Requester deleted.');
     }
 }

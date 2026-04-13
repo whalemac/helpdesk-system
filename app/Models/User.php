@@ -47,4 +47,19 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function assignedTickets()
+    {
+        return $this->hasMany(\App\Models\Ticket::class, 'assigned_user_id');
+    }
+
+    public function createdTickets()
+    {
+        return $this->hasMany(\App\Models\Ticket::class, 'created_by');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(\App\Models\TicketReply::class);
+    }
 }

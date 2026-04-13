@@ -55,7 +55,14 @@
                                 {{ $requester->created_at->format('M d, Y') }}
                             </td>
                             <td class="relative whitespace-nowrap py-5 pl-3 pr-6 text-right text-sm font-medium">
-                                <a href="#" class="text-blue-600 hover:text-blue-900 font-semibold">Edit</a>
+                                <div class="flex items-center justify-end gap-3">
+                                    <a href="{{ route('requesters.show', $requester) }}" class="text-gray-500 hover:text-gray-700 font-medium">View</a>
+                                    <a href="{{ route('requesters.edit', $requester) }}" class="text-blue-600 hover:text-blue-800 font-semibold">Edit</a>
+                                    <form action="{{ route('requesters.destroy', $requester) }}" method="POST" onsubmit="return confirm('Delete this requester?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-800 font-semibold">Delete</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
