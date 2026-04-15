@@ -15,55 +15,65 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Admin: User Management
+    // ── Admin: User Management ────────────────────────────────────────────────
     Route::middleware('role:admin')->prefix('users')->name('users.')->group(function () {
-        Route::get('/', [App\Http\Controllers\UserController::class, 'index'])->name('index');
-        Route::get('/create', [App\Http\Controllers\UserController::class, 'create'])->name('create');
-        Route::post('/', [App\Http\Controllers\UserController::class, 'store'])->name('store');
-        Route::get('/{user}/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('edit');
-        Route::patch('/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('update');
-        Route::delete('/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('destroy');
+        Route::get('/',               [App\Http\Controllers\UserController::class, 'index'])->name('index');
+        Route::get('/create',         [App\Http\Controllers\UserController::class, 'create'])->name('create');
+        Route::post('/',              [App\Http\Controllers\UserController::class, 'store'])->name('store');
+        Route::get('/{user}/edit',    [App\Http\Controllers\UserController::class, 'edit'])->name('edit');
+        Route::patch('/{user}',       [App\Http\Controllers\UserController::class, 'update'])->name('update');
+        Route::delete('/{user}',      [App\Http\Controllers\UserController::class, 'destroy'])->name('destroy');
     });
 
-    // Admin: Requester Management
+    // ── Admin: Requester Management ───────────────────────────────────────────
     Route::middleware('role:admin')->prefix('requesters')->name('requesters.')->group(function () {
-        Route::get('/', [RequesterController::class, 'index'])->name('index');
-        Route::get('/create', [RequesterController::class, 'create'])->name('create');
-        Route::post('/', [RequesterController::class, 'store'])->name('store');
-        Route::get('/{requester}', [RequesterController::class, 'show'])->name('show');
-        Route::get('/{requester}/edit', [RequesterController::class, 'edit'])->name('edit');
-        Route::patch('/{requester}', [RequesterController::class, 'update'])->name('update');
-        Route::delete('/{requester}', [RequesterController::class, 'destroy'])->name('destroy');
+        Route::get('/',                   [RequesterController::class, 'index'])->name('index');
+        Route::get('/create',             [RequesterController::class, 'create'])->name('create');
+        Route::post('/',                  [RequesterController::class, 'store'])->name('store');
+        Route::get('/{requester}',        [RequesterController::class, 'show'])->name('show');
+        Route::get('/{requester}/edit',   [RequesterController::class, 'edit'])->name('edit');
+        Route::patch('/{requester}',      [RequesterController::class, 'update'])->name('update');
+        Route::delete('/{requester}',     [RequesterController::class, 'destroy'])->name('destroy');
     });
 
-    // Tickets (all roles, role logic handled in controller)
+    // ── Tickets (all authenticated roles, logic handled in controller) ────────
     Route::prefix('tickets')->name('tickets.')->group(function () {
-        Route::get('/', [App\Http\Controllers\TicketController::class, 'index'])->name('index');
-        Route::get('/create', [App\Http\Controllers\TicketController::class, 'create'])->name('create');
-        Route::post('/', [App\Http\Controllers\TicketController::class, 'store'])->name('store');
-        Route::get('/{ticket}', [App\Http\Controllers\TicketController::class, 'show'])->name('show');
-        Route::get('/{ticket}/edit', [App\Http\Controllers\TicketController::class, 'edit'])->name('edit');
-        Route::patch('/{ticket}', [App\Http\Controllers\TicketController::class, 'update'])->name('update');
-        Route::patch('/{ticket}/status', [App\Http\Controllers\TicketController::class, 'updateStatus'])->name('update-status');
-        Route::patch('/{ticket}/assign', [App\Http\Controllers\TicketController::class, 'assign'])->name('assign');
-        Route::post('/{ticket}/replies', [App\Http\Controllers\TicketReplyController::class, 'store'])->name('replies.store');
+        Route::get('/',                   [App\Http\Controllers\TicketController::class, 'index'])->name('index');
+        Route::get('/create',             [App\Http\Controllers\TicketController::class, 'create'])->name('create');
+        Route::post('/',                  [App\Http\Controllers\TicketController::class, 'store'])->name('store');
+        Route::get('/{ticket}',           [App\Http\Controllers\TicketController::class, 'show'])->name('show');
+        Route::get('/{ticket}/edit',      [App\Http\Controllers\TicketController::class, 'edit'])->name('edit');
+        Route::patch('/{ticket}',         [App\Http\Controllers\TicketController::class, 'update'])->name('update');
+        Route::patch('/{ticket}/status',  [App\Http\Controllers\TicketController::class, 'updateStatus'])->name('update-status');
+        Route::patch('/{ticket}/assign',  [App\Http\Controllers\TicketController::class, 'assign'])->name('assign');
+        Route::patch('/{ticket}/reassign',[App\Http\Controllers\TicketController::class, 'reassign'])->name('reassign');
+        Route::post('/{ticket}/replies',  [App\Http\Controllers\TicketReplyController::class, 'store'])->name('replies.store');
     });
 
-    // Admin: Category Management
+    // ── Admin: Category Management ────────────────────────────────────────────
     Route::middleware('role:admin')->prefix('categories')->name('categories.')->group(function () {
-        Route::get('/', [CategoryController::class, 'index'])->name('index');
-        Route::post('/', [CategoryController::class, 'store'])->name('store');
-        Route::patch('/{category}', [CategoryController::class, 'update'])->name('update');
-        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
+        Route::get('/',                  [CategoryController::class, 'index'])->name('index');
+        Route::post('/',                 [CategoryController::class, 'store'])->name('store');
+        Route::get('/{category}/edit',   [CategoryController::class, 'edit'])->name('edit');
+        Route::put('/{category}',        [CategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}',     [CategoryController::class, 'destroy'])->name('destroy');
     });
 
-    // Admin + Supervisor: Reports
+    // ── Admin + Supervisor: Reports ───────────────────────────────────────────
     Route::middleware('role:admin,supervisor')->prefix('reports')->name('reports.')->group(function () {
-        Route::get('/', [App\Http\Controllers\ReportController::class, 'index'])->name('index');
+        Route::get('/',           [App\Http\Controllers\ReportController::class, 'index'])->name('index');
+        Route::get('/export-pdf', [App\Http\Controllers\ReportController::class, 'exportPdf'])->name('export-pdf');
+    });
+
+    // ── Admin: System Settings ────────────────────────────────────────────────
+    Route::middleware('role:admin')->prefix('system')->name('system.')->group(function () {
+        Route::get('/',  [App\Http\Controllers\SystemController::class, 'index'])->name('index');
+        Route::post('/', [App\Http\Controllers\SystemController::class, 'update'])->name('update');
     });
 });
 

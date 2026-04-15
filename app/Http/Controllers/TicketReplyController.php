@@ -10,16 +10,18 @@ class TicketReplyController extends Controller
 {
     public function store(Request $request, Ticket $ticket)
     {
-        // Access check
-        $role = auth()->user()->role;
-        if ($role === 'agent' && $ticket->assigned_user_id !== auth()->id()) {
-            abort(403);
-        }
-        if ($role === 'requester' && $ticket->created_by !== auth()->id()) {
-            abort(403);
+        // Authorization: admin/supervisor can reply on any ticket;
+        // agents only on their assigned tickets; requesters only on their own tickets.
+        $user    = auth()->user();
+        $allowed = in_array($user->role, ['admin', 'supervisor'])
+                   || ($user->role === 'agent' && $ticket->assigned_user_id === $user->id)
+                   || ($user->role === 'requester' && $ticket->created_by === $user->id);
+
+        if (!$allowed) {
+            abort(403, 'You are not authorized to reply to this ticket.');
         }
 
-        // Closed tickets cannot receive new replies
+        // Closed tickets cannot receive replies
         if ($ticket->status === 'closed') {
             return redirect()->back()->with('error', 'This ticket is closed and cannot receive new replies.');
         }
@@ -29,20 +31,21 @@ class TicketReplyController extends Controller
             'reply_type' => 'required|in:public,internal',
         ]);
 
-        TicketReply::create([
+        $reply = TicketReply::create([
             'ticket_id'  => $ticket->id,
-            'user_id'    => auth()->id(),
+            'user_id'    => $user->id,   // always from auth, never from form input
             'message'    => $request->message,
             'reply_type' => $request->reply_type,
         ]);
 
-        // Auto-update ticket status based on who replies
-        if ($ticket->status === 'open' && in_array($role, ['admin', 'supervisor', 'agent'])) {
+        // Smart status transitions
+        if ($ticket->status === 'open' && in_array($user->role, ['admin', 'supervisor', 'agent'])) {
             $ticket->update(['status' => 'in_progress']);
-        } elseif ($ticket->status === 'resolved' && $role === 'requester') {
+        } elseif ($ticket->status === 'resolved' && $user->role === 'requester') {
             $ticket->update(['status' => 'open']);
         }
 
-        return redirect()->back()->with('success', 'Reply posted successfully.');
+        return redirect()->route('tickets.show', $reply->ticket_id)
+                         ->with('success', 'Reply added successfully.');
     }
 }
