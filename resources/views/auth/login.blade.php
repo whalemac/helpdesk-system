@@ -1,140 +1,368 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'HelpDesk') }} - Login</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="min-h-screen bg-white antialiased">
-    <div class="flex min-h-screen">
-        <div class="hidden min-h-screen w-2/5 flex-col bg-[#1a3faa] px-10 py-10 text-white lg:flex">
-            <h1 class="text-4xl font-bold leading-tight">Ticket Support System</h1>
-            <p class="mt-4 max-w-md text-sm leading-6 text-blue-100">
-                An email ticketing system helps you convert customer emails to tickets, and compiles and organizes
-                them in a single place so no customer complaint goes unnoticed.
-            </p>
-            <p class="mt-6 text-2xl tracking-[0.5em] text-blue-100">--</p>
+    <title>{{ config('app.name', 'HelpDesk') }} – Sign In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-            <div class="mt-auto pb-3">
-                <svg class="h-auto w-full max-w-md" viewBox="0 0 520 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="110" y="260" width="300" height="14" rx="3" fill="#DDE9FF"/>
-                    <rect x="175" y="230" width="170" height="35" rx="6" fill="#BFD5FF"/>
-                    <circle cx="260" cy="180" r="28" fill="#E9F1FF"/>
-                    <rect x="230" y="208" width="60" height="56" rx="10" fill="#D6E5FF"/>
-                    <rect x="205" y="248" width="28" height="12" rx="3" fill="#E9F1FF"/>
-                    <rect x="287" y="248" width="28" height="12" rx="3" fill="#E9F1FF"/>
-                    <rect x="70" y="120" width="82" height="54" rx="12" fill="#EDF4FF"/>
-                    <text x="111" y="154" text-anchor="middle" font-size="30" fill="#1a3faa" font-weight="700">?</text>
-                    <rect x="360" y="90" width="96" height="60" rx="12" fill="#EDF4FF"/>
-                    <text x="408" y="128" text-anchor="middle" font-size="28" fill="#1a3faa" font-weight="700">✉</text>
-                    <rect x="390" y="190" width="80" height="46" rx="12" fill="#D6E5FF"/>
-                    <rect x="48" y="206" width="88" height="50" rx="12" fill="#D6E5FF"/>
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background-color: #0d1117;
+            background-image:
+                radial-gradient(circle at 20% 30%, #0a1628 0%, transparent 55%),
+                radial-gradient(circle at 80% 70%, #0d2044 0%, transparent 55%),
+                radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+            background-size: auto, auto, 28px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative background headset icon */
+        .bg-icon {
+            position: fixed;
+            right: -60px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 580px;
+            line-height: 1;
+            opacity: 0.04;
+            color: #ffffff;
+            pointer-events: none;
+            user-select: none;
+            z-index: 0;
+        }
+
+        /* Glass card */
+        .glass-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 380px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 40px 36px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+        }
+
+        /* Brand */
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            background: #2a63c7;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .brand-icon svg {
+            width: 20px;
+            height: 20px;
+            color: #fff;
+        }
+
+        .brand-text-group {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .brand-name {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 17px;
+        }
+
+        .brand-sub {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 11px;
+            margin-top: 1px;
+        }
+
+        /* Heading */
+        .form-title {
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .form-subtitle {
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        /* Status message */
+        .status-msg {
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 10px;
+            color: #4ade80;
+            font-size: 13px;
+            padding: 10px 14px;
+            margin-bottom: 20px;
+        }
+
+        /* Form fields */
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        label {
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .forgot-link {
+            color: #4d9de0;
+            font-size: 12px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .forgot-link:hover {
+            color: #74b5ea;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            height: 42px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 14px;
+            font-family: inherit;
+            padding: 0 14px;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+            -webkit-appearance: none;
+        }
+
+        input[type="email"]::placeholder,
+        input[type="password"]::placeholder,
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="text"]:focus {
+            border-color: #2a63c7;
+            background: rgba(42, 99, 199, 0.1);
+        }
+
+        /* Chrome autofill dark override */
+        input:-webkit-autofill,
+        input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px #0d1b38 inset !important;
+            -webkit-text-fill-color: rgba(255, 255, 255, 0.85) !important;
+            caret-color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* Validation errors */
+        .error-msg {
+            color: #f87171;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        /* Remember + forgot row */
+        .remember-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+
+        .remember-label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            accent-color: #2a63c7;
+            cursor: pointer;
+        }
+
+        /* Submit button */
+        .btn-primary {
+            width: 100%;
+            height: 42px;
+            background: #2a63c7;
+            border: none;
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn-primary:hover {
+            background: #3572d4;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.99);
+        }
+
+        /* Divider */
+        .divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 24px 0 18px;
+        }
+
+        /* Footer text */
+        .card-footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13px;
+        }
+
+        .card-footer a {
+            color: #4d9de0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .card-footer a:hover {
+            color: #74b5ea;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Decorative background headset symbol -->
+    <div class="bg-icon" aria-hidden="true">&#x1F3A7;</div>
+
+    <div class="glass-card">
+
+        <!-- Brand -->
+        <div class="brand">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z" />
+                    <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
                 </svg>
             </div>
-        </div>
-
-        <div class="relative flex min-h-screen w-full items-start justify-center overflow-hidden bg-white px-6 py-8 lg:w-3/5">
-            <div class="absolute inset-0 overflow-hidden pointer-events-none select-none">
-                <span class="absolute left-12 top-8 text-2xl text-gray-200">+</span>
-                <span class="absolute right-20 top-16 text-2xl text-gray-200">+</span>
-                <span class="absolute bottom-24 left-8 text-2xl text-gray-200">+</span>
-                <span class="absolute bottom-12 right-16 text-2xl text-gray-200">+</span>
-                <div class="absolute left-6 top-20 h-10 w-16 rounded border-2 border-gray-200 opacity-40"></div>
-                <div class="absolute right-8 top-32 h-12 w-20 rounded border-2 border-gray-200 opacity-40"></div>
-                <div class="absolute bottom-32 right-10 h-10 w-16 rounded border-2 border-gray-200 opacity-40"></div>
-            </div>
-
-            <div class="relative z-10 mt-10 w-full max-w-md rounded-2xl bg-white px-10 py-12 shadow-xl lg:mt-24">
-                <h2 class="text-4xl font-bold text-[#1a2f6e]">Hello, Ticket Support</h2>
-                <p class="mt-3 text-sm text-gray-500">
-                    Login to your account to get started. Or new user
-                    <a href="{{ route('register') }}" class="font-bold underline">Sign Up</a>
-                </p>
-
-                @if (session('status'))
-                    <div class="mt-6 rounded-lg bg-green-50 p-4 text-sm font-medium text-green-700 mx-auto border border-green-200 flex items-center gap-3">
-                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        {{ session('status') }}
-                    </div>
-                @endif
-
-                <form method="POST" action="{{ route('login') }}" class="mt-8 space-y-5">
-                    @csrf
-
-                    <div>
-                        <div class="relative">
-                            <input
-                                id="email"
-                                type="email"
-                                name="email"
-                                value="{{ old('email') }}"
-                                required
-                                autofocus
-                                placeholder="User Name"
-                                class="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 pr-11 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                            <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-300">
-                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM4 20a8 8 0 1116 0" />
-                                </svg>
-                            </span>
-                        </div>
-                        @error('email')
-                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <div class="relative">
-                            <input
-                                id="password"
-                                type="password"
-                                name="password"
-                                required
-                                placeholder="Password"
-                                class="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 pr-11 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                            <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-300">
-                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                    <rect x="5" y="10" width="14" height="10" rx="2"></rect>
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 10V7a4 4 0 118 0v3" />
-                                </svg>
-                            </span>
-                        </div>
-                        @error('password')
-                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <label for="remember_me" class="flex items-center gap-2 text-sm text-gray-600">
-                            <input
-                                id="remember_me"
-                                type="checkbox"
-                                name="remember"
-                                class="h-4 w-4 accent-[#00c896]"
-                            >
-                            Remember Me
-                        </label>
-                        <a href="{{ route('password.request') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700">
-                            Forgot Password
-                        </a>
-                    </div>
-
-                    <button
-                        type="submit"
-                        class="flex w-full items-center justify-between rounded-lg bg-[#1a3faa] px-5 py-3 text-white transition hover:bg-[#1535a0]"
-                    >
-                        <span class="font-semibold">Login</span>
-                        <span class="text-lg leading-none">→</span>
-                    </button>
-                </form>
+            <div class="brand-text-group">
+                <span class="brand-name">HelpDesk</span>
+                <span class="brand-sub">Support portal</span>
             </div>
         </div>
+
+        <!-- Heading -->
+        <h1 class="form-title">Welcome back</h1>
+        <p class="form-subtitle">Sign in to your account to continue</p>
+
+        <!-- Session status -->
+        @if (session('status'))
+            <div class="status-msg">{{ session('status') }}</div>
+        @endif
+
+        <!-- Login form -->
+        <form method="POST" action="{{ route('login') }}">
+            @csrf
+
+            <!-- Email -->
+            <div class="field">
+                <label for="email">Email address</label>
+                <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
+                    autocomplete="username" placeholder="">
+                @error('email')
+                    <p class="error-msg">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Password -->
+            <div class="field">
+                <div class="field-row">
+                    <label for="password">Password</label>
+                    @if (Route::has('password.request'))
+                        <a href="{{ route('password.request') }}" class="forgot-link">Forgot password?</a>
+                    @endif
+                </div>
+                <input id="password" type="password" name="password" required autocomplete="current-password"
+                    placeholder="••••••••">
+                @error('password')
+                    <p class="error-msg">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Remember me -->
+            <div class="remember-row">
+                <label class="remember-label" for="remember_me">
+                    <input id="remember_me" type="checkbox" name="remember">
+                    Remember me
+                </label>
+            </div>
+
+            <button type="submit" class="btn-primary">Sign in</button>
+        </form>
+
+        <hr class="divider">
+
+        <p class="card-footer">
+            Don't have an account?
+            <a href="{{ route('register') }}">Register</a>
+        </p>
+
     </div>
+
 </body>
+
 </html>

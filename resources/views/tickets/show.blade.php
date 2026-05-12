@@ -64,7 +64,7 @@
             @foreach($ticket->replies as $reply)
                 @php
                     $isRequester = $reply->user->role === 'requester';
-                    $isInternal  = $reply->reply_type === 'internal';
+                    $isInternal  = $reply->reply_type === 'internal_note';
                     $avatarColor = $isRequester ? 'bg-gray-200 text-gray-600' : ($isInternal ? 'bg-amber-100 text-amber-700' : 'bg-blue-600 text-white');
                 @endphp
                 @if($isInternal && auth()->user()->role === 'requester')
@@ -99,21 +99,23 @@
                 <div class="bg-blue-50/50 px-6 py-4 border-b border-blue-100">
                     <h3 class="text-sm font-semibold text-blue-900">Post a Reply</h3>
                 </div>
-                <form action="{{ route('tickets.replies.store', $ticket) }}" method="POST" class="p-6">
+                <form action="{{ route('ticket-replies.store') }}" method="POST" class="p-6">
                     @csrf
+                    <input type="hidden" name="ticket_id" value="{{ $ticket->id }}">
                     <textarea name="message" rows="4" required
                         placeholder="Type your response here..."
                         class="block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"></textarea>
+                    @error('message') <span class="text-xs text-red-500 mt-1">{{ $message }}</span> @enderror
 
                     <div class="mt-4 flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <span class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Reply Type:</span>
                             <label class="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer">
-                                <input type="radio" name="reply_type" value="public" checked class="text-blue-600"> Public
+                                <input type="radio" name="reply_type" value="reply" checked class="text-blue-600"> Public Reply
                             </label>
                             @if(auth()->user()->role !== 'requester')
                                 <label class="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer">
-                                    <input type="radio" name="reply_type" value="internal" class="text-blue-600"> Internal Note
+                                    <input type="radio" name="reply_type" value="internal_note" class="text-blue-600"> Internal Note
                                 </label>
                             @endif
                         </div>
@@ -174,7 +176,7 @@
                 <div class="pt-4 border-t border-gray-100">
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Priority</label>
                     @php
-                        $pc = ['low'=>'bg-gray-100 text-gray-600','medium'=>'bg-blue-100 text-blue-700','high'=>'bg-orange-100 text-orange-700 ring-1 ring-orange-600/20','critical'=>'bg-red-100 text-red-800 ring-1 ring-red-600/20'];
+                        $pc = ['low'=>'bg-gray-100 text-gray-600','medium'=>'bg-blue-100 text-blue-700','high'=>'bg-orange-100 text-orange-700 ring-1 ring-orange-600/20','urgent'=>'bg-red-100 text-red-800 ring-1 ring-red-600/20'];
                     @endphp
                     <span class="inline-flex items-center px-3 py-1 font-semibold text-sm rounded-full {{ $pc[$ticket->priority] ?? 'bg-gray-100' }}">
                         {{ strtoupper($ticket->priority) }}

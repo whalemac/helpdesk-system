@@ -63,21 +63,25 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium leading-6 text-gray-900">Priority</label>
+                            <label class="block text-sm font-medium leading-6 text-gray-900">Priority <span class="text-red-500">*</span></label>
                             <select name="priority" class="mt-2 block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
                                 <option value="low">Low</option>
                                 <option value="medium" selected>Medium</option>
                                 <option value="high">High</option>
-                                <option value="critical">Critical</option>
+                                <option value="urgent">Urgent</option>
                             </select>
+                            @error('priority') <span class="text-xs text-red-500 mt-1">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium leading-6 text-gray-900">Status</label>
+                            <label class="block text-sm font-medium leading-6 text-gray-900">Status <span class="text-red-500">*</span></label>
                             <select name="status" class="mt-2 block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
                                 <option value="open">Open</option>
                                 <option value="in_progress">In Progress</option>
+                                <option value="pending">Pending</option>
                                 <option value="resolved">Resolved</option>
+                                <option value="closed">Closed</option>
                             </select>
+                            @error('status') <span class="text-xs text-red-500 mt-1">{{ $message }}</span> @enderror
                         </div>
                     </div>
 
@@ -87,9 +91,10 @@
                         <select name="assigned_user_id" class="mt-2 block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
                             <option value="">Unassigned</option>
                             @foreach($agents as $agent)
-                                <option value="{{ $agent->id }}">{{ $agent->name }} ({{ ucfirst($agent->role) }})</option>
+                                <option value="{{ $agent->id }}">{{ $agent->name }}</option>
                             @endforeach
                         </select>
+                        @error('assigned_user_id') <span class="text-xs text-red-500 mt-1">{{ $message }}</span> @enderror
                     </div>
                     @endif
                 </div>

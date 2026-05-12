@@ -7,8 +7,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // MySQL: Modify the enum column to add 'critical'
-        DB::statement("ALTER TABLE tickets MODIFY COLUMN priority ENUM('low','medium','high','critical') NOT NULL DEFAULT 'medium'");
+        // Keep the priority enum aligned with spec: low, medium, high, urgent
+        // This migration intentionally preserves the original 'urgent' value
+        // and does NOT change it to 'critical' (which was a prior mistake).
+        DB::statement("ALTER TABLE tickets MODIFY COLUMN priority ENUM('low','medium','high','urgent') NOT NULL DEFAULT 'medium'");
     }
 
     public function down(): void

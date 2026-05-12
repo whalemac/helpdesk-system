@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('ticket_replies', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ticket_id')->constrained('tickets')->cascadeOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete(); // user_id can be null if it's an automated system reply or from a requester? Wait, instructions say: Every ticket reply must be linked to a user. So not nullable.
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->text('message');
-            $table->enum('reply_type', ['reply', 'internal_note', 'status_update'])->default('reply');
+            $table->enum('reply_type', ['reply', 'internal_note'])->default('reply');
             $table->timestamps();
         });
     }

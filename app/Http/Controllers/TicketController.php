@@ -35,7 +35,7 @@ class TicketController extends Controller
 
         $categories = Category::where('status', 'active')->get();
         $requesters = Requester::all();
-        $agents     = User::whereIn('role', ['admin', 'supervisor', 'agent'])->get();
+        $agents     = User::where('role', 'agent')->get();
 
         return view('tickets.create', compact('categories', 'requesters', 'agents'));
     }
@@ -51,7 +51,7 @@ class TicketController extends Controller
             'category_id'      => 'required|exists:categories,id',
             'subject'          => 'required|max:255',
             'description'      => 'required',
-            'priority'         => 'required|in:low,medium,high,critical',
+            'priority'         => 'required|in:low,medium,high,urgent',
             'status'           => 'required|in:open,in_progress,pending,resolved,closed',
             'assigned_user_id' => 'nullable|exists:users,id',
         ]);
@@ -83,8 +83,7 @@ class TicketController extends Controller
     public function edit(Ticket $ticket)
     {
         if ($ticket->status === 'closed') {
-            return redirect()->route('tickets.show', $ticket)
-                ->with('error', 'Closed tickets cannot be edited. Reopen the ticket first.');
+            return back()->with('error', 'This ticket is closed and cannot be edited.');
         }
 
         $role = auth()->user()->role;
@@ -97,7 +96,7 @@ class TicketController extends Controller
 
         $categories = Category::where('status', 'active')->get();
         $requesters = Requester::all();
-        $agents     = User::whereIn('role', ['admin', 'supervisor', 'agent'])->get();
+        $agents     = User::where('role', 'agent')->get();
 
         return view('tickets.edit', compact('ticket', 'categories', 'requesters', 'agents'));
     }
@@ -105,7 +104,7 @@ class TicketController extends Controller
     public function update(Request $request, Ticket $ticket)
     {
         if ($ticket->status === 'closed') {
-            return redirect()->back()->with('error', 'Closed tickets cannot be edited.');
+            return back()->with('error', 'This ticket is closed and cannot be edited.');
         }
 
         $role = auth()->user()->role;
@@ -118,7 +117,7 @@ class TicketController extends Controller
             'category_id'      => 'required|exists:categories,id',
             'subject'          => 'required|max:255',
             'description'      => 'required',
-            'priority'         => 'required|in:low,medium,high,critical',
+            'priority'         => 'required|in:low,medium,high,urgent',
             'status'           => 'required|in:open,in_progress,pending,resolved,closed',
             'assigned_user_id' => 'nullable|exists:users,id',
         ]);
@@ -190,10 +189,22 @@ class TicketController extends Controller
             'ticket_id'  => $ticket->id,
             'user_id'    => auth()->id(),
             'message'    => 'Ticket reassigned to ' . $newAgent->name . ' by ' . auth()->user()->name . '.',
-            'reply_type' => 'internal',
+            'reply_type' => 'internal_note',
         ]);
 
         return redirect()->route('tickets.show', $ticket)
                          ->with('success', 'Ticket reassigned to ' . $newAgent->name . '.');
+    }
+
+    public function destroy(Ticket $ticket)
+    {
+        $role = auth()->user()->role;
+        if (!in_array($role, ['admin', 'supervisor'])) {
+            abort(403, 'Only Admins and Supervisors can delete tickets.');
+        }
+
+        $ticket->delete();
+
+        return redirect()->route('tickets.index')->with('success', 'Ticket deleted successfully.');
     }
 }

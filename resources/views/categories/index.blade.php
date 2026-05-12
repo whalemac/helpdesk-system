@@ -73,6 +73,7 @@
                     <label class="block text-sm font-medium leading-6 text-gray-900">Category Name <span class="text-red-500">*</span></label>
                     <input type="text" name="name" required value="{{ old('name') }}"
                         class="mt-2 block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+                    @error('name') <span class="text-xs text-red-500 mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium leading-6 text-gray-900">Description</label>

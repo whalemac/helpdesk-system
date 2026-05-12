@@ -68,7 +68,7 @@
                 @forelse($recentTickets as $ticket)
                     @php
                         $statusColors = ['open'=>'bg-blue-50 text-blue-700','in_progress'=>'bg-amber-50 text-amber-700','pending'=>'bg-purple-50 text-purple-700','resolved'=>'bg-emerald-50 text-emerald-700','closed'=>'bg-gray-100 text-gray-600'];
-                        $priorityColors = ['low'=>'text-gray-400','medium'=>'text-blue-500 font-semibold','high'=>'text-orange-600 font-bold','critical'=>'text-red-700 font-black'];
+                        $priorityColors = ['low'=>'text-gray-400','medium'=>'text-blue-500 font-semibold','high'=>'text-orange-600 font-bold','urgent'=>'text-red-700 font-black'];
                     @endphp
                     <tr class="hover:bg-gray-50 transition">
                         <td class="py-4 pl-6 pr-3 text-sm text-gray-400 font-mono">#{{ $ticket->id }}</td>

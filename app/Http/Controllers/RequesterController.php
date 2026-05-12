@@ -62,8 +62,8 @@ class RequesterController extends Controller
     public function destroy(Requester $requester)
     {
         if ($requester->tickets()->count() > 0) {
-            return redirect()->route('requesters.index')
-                ->with('error', 'Cannot delete a requester with existing tickets.');
+            return back()
+                ->with('error', 'Cannot delete requester with existing tickets.');
         }
 
         $requester->delete();

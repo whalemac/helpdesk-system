@@ -133,10 +133,10 @@
                     @foreach($ticketsByPriority as $priorityData)
                         @php
                             $bg = match($priorityData->priority) {
-                                'critical' => 'bg-red-100 text-red-800',
-                                'high'     => 'bg-orange-50 text-orange-700',
-                                'medium'   => 'bg-blue-50 text-blue-700',
-                                default    => 'bg-gray-100 text-gray-600',
+                                'urgent' => 'bg-red-100 text-red-800',
+                                'high'   => 'bg-orange-50 text-orange-700',
+                                'medium' => 'bg-blue-50 text-blue-700',
+                                default  => 'bg-gray-100 text-gray-600',
                             };
                         @endphp
                         <div class="rounded-lg p-3 text-center {{ $bg }}">

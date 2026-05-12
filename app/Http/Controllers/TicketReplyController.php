@@ -8,8 +8,16 @@ use Illuminate\Http\Request;
 
 class TicketReplyController extends Controller
 {
-    public function store(Request $request, Ticket $ticket)
+    public function store(Request $request)
     {
+        $request->validate([
+            'ticket_id'  => 'required|exists:tickets,id',
+            'message'    => 'required|string',
+            'reply_type' => 'required|in:reply,internal_note',
+        ]);
+
+        $ticket = Ticket::findOrFail($request->ticket_id);
+
         // Authorization: admin/supervisor can reply on any ticket;
         // agents only on their assigned tickets; requesters only on their own tickets.
         $user    = auth()->user();
@@ -26,14 +34,9 @@ class TicketReplyController extends Controller
             return redirect()->back()->with('error', 'This ticket is closed and cannot receive new replies.');
         }
 
-        $request->validate([
-            'message'    => 'required|string',
-            'reply_type' => 'required|in:public,internal',
-        ]);
-
         $reply = TicketReply::create([
             'ticket_id'  => $ticket->id,
-            'user_id'    => $user->id,   // always from auth, never from form input
+            'user_id'    => $user->id,
             'message'    => $request->message,
             'reply_type' => $request->reply_type,
         ]);
@@ -45,7 +48,7 @@ class TicketReplyController extends Controller
             $ticket->update(['status' => 'open']);
         }
 
-        return redirect()->route('tickets.show', $reply->ticket_id)
-                         ->with('success', 'Reply added successfully.');
+        return redirect()->route('tickets.show', $ticket->id)
+                         ->with('success', 'Reply added.');
     }
 }

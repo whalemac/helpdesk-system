@@ -29,7 +29,7 @@
 
         <form action="{{ route('categories.update', $category) }}" method="POST" class="px-8 py-6 space-y-6">
             @csrf
-            @method('PUT')
+            @method('PATCH')
 
             <div>
                 <label class="block text-sm font-medium leading-6 text-gray-900">Category Name <span class="text-red-500">*</span></label>

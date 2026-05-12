@@ -14,21 +14,28 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
+        // Required variables always passed to every dashboard view
+        $totalTickets = Ticket::count();
+        $openTickets  = Ticket::where('status', 'open')->count();
+        $inProgress   = Ticket::where('status', 'in_progress')->count();
+        $resolved     = Ticket::whereIn('status', ['resolved', 'closed'])->count();
+        $highPriority = Ticket::whereIn('priority', ['high', 'urgent'])->count();
+
         return match($user->role) {
-            'admin'      => $this->adminDashboard(),
-            'agent'      => $this->agentDashboard($user),
-            'supervisor' => $this->supervisorDashboard(),
-            'requester'  => $this->requesterDashboard($user),
+            'admin'      => $this->adminDashboard($totalTickets, $openTickets, $inProgress, $resolved, $highPriority),
+            'agent'      => $this->agentDashboard($user, $totalTickets, $openTickets, $inProgress, $resolved, $highPriority),
+            'supervisor' => $this->supervisorDashboard($totalTickets, $openTickets, $inProgress, $resolved, $highPriority),
+            'requester'  => $this->requesterDashboard($user, $totalTickets, $openTickets, $inProgress, $resolved, $highPriority),
             default      => redirect()->route('login'),
         };
     }
 
-    private function adminDashboard()
+    private function adminDashboard(int $totalTickets, int $openTickets, int $inProgress, int $resolved, int $highPriority)
     {
         $stats = [
             'open_tickets'     => Ticket::whereNotIn('status', ['resolved', 'closed'])->count(),
             'resolved_tickets' => Ticket::whereIn('status', ['resolved', 'closed'])->count(),
-            'high_priority'    => Ticket::whereIn('priority', ['high', 'critical'])->count(),
+            'high_priority'    => Ticket::whereIn('priority', ['high', 'urgent'])->count(),
             'total_users'      => User::count(),
             'total_categories' => Category::count(),
         ];
@@ -38,10 +45,10 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        return view('dashboard.admin', compact('stats', 'recentTickets'));
+        return view('dashboard.admin', compact('stats', 'recentTickets', 'totalTickets', 'openTickets', 'inProgress', 'resolved', 'highPriority'));
     }
 
-    private function agentDashboard(User $user)
+    private function agentDashboard(User $user, int $totalTickets, int $openTickets, int $inProgress, int $resolved, int $highPriority)
     {
         $stats = [
             'open_assigned'     => Ticket::where('assigned_user_id', $user->id)
@@ -60,14 +67,14 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('dashboard.agent', compact('stats', 'myTickets'));
+        return view('dashboard.agent', compact('stats', 'myTickets', 'totalTickets', 'openTickets', 'inProgress', 'resolved', 'highPriority'));
     }
 
-    private function supervisorDashboard()
+    private function supervisorDashboard(int $totalTickets, int $openTickets, int $inProgress, int $resolved, int $highPriority)
     {
         $stats = [
             'open_tickets'       => Ticket::whereNotIn('status', ['resolved', 'closed'])->count(),
-            'high_priority'      => Ticket::whereIn('priority', ['high', 'critical'])->count(),
+            'high_priority'      => Ticket::whereIn('priority', ['high', 'urgent'])->count(),
             'resolved_this_week' => Ticket::whereIn('status', ['resolved', 'closed'])
                                           ->whereBetween('updated_at', [
                                               Carbon::now()->startOfWeek(),
@@ -86,16 +93,16 @@ class DashboardController extends Controller
 
         // Escalated tickets: critical or high priority that are still open
         $escalatedTickets = Ticket::with(['requester', 'assignedUser'])
-            ->whereIn('priority', ['critical', 'high'])
+            ->whereIn('priority', ['urgent', 'high'])
             ->where('status', 'open')
             ->latest()
             ->take(10)
             ->get();
 
-        return view('dashboard.supervisor', compact('stats', 'agents', 'escalatedTickets'));
+        return view('dashboard.supervisor', compact('stats', 'agents', 'escalatedTickets', 'totalTickets', 'openTickets', 'inProgress', 'resolved', 'highPriority'));
     }
 
-    private function requesterDashboard(User $user)
+    private function requesterDashboard(User $user, int $totalTickets, int $openTickets, int $inProgress, int $resolved, int $highPriority)
     {
         $stats = [
             'total_submitted' => Ticket::where('created_by', $user->id)->count(),
@@ -110,6 +117,6 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
-        return view('dashboard.requester', compact('stats', 'myTickets'));
+        return view('dashboard.requester', compact('stats', 'myTickets', 'totalTickets', 'openTickets', 'inProgress', 'resolved', 'highPriority'));
     }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\RequesterController;
+use App\Http\Controllers\TicketReplyController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -50,9 +51,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/{ticket}/edit',      [App\Http\Controllers\TicketController::class, 'edit'])->name('edit');
         Route::patch('/{ticket}',         [App\Http\Controllers\TicketController::class, 'update'])->name('update');
         Route::patch('/{ticket}/status',  [App\Http\Controllers\TicketController::class, 'updateStatus'])->name('update-status');
+        Route::delete('/{ticket}',        [App\Http\Controllers\TicketController::class, 'destroy'])->name('destroy');
         Route::patch('/{ticket}/assign',  [App\Http\Controllers\TicketController::class, 'assign'])->name('assign');
         Route::patch('/{ticket}/reassign',[App\Http\Controllers\TicketController::class, 'reassign'])->name('reassign');
-        Route::post('/{ticket}/replies',  [App\Http\Controllers\TicketReplyController::class, 'store'])->name('replies.store');
+        Route::post('/{ticket}/replies',  [TicketReplyController::class, 'store'])->name('replies.store');
     });
 
     // ── Admin: Category Management ────────────────────────────────────────────
@@ -60,7 +62,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/',                  [CategoryController::class, 'index'])->name('index');
         Route::post('/',                 [CategoryController::class, 'store'])->name('store');
         Route::get('/{category}/edit',   [CategoryController::class, 'edit'])->name('edit');
-        Route::put('/{category}',        [CategoryController::class, 'update'])->name('update');
+        Route::patch('/{category}',      [CategoryController::class, 'update'])->name('update');
         Route::delete('/{category}',     [CategoryController::class, 'destroy'])->name('destroy');
     });
 
@@ -75,6 +77,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/',  [App\Http\Controllers\SystemController::class, 'index'])->name('index');
         Route::post('/', [App\Http\Controllers\SystemController::class, 'update'])->name('update');
     });
+    // ── Ticket Replies (standalone route) ─────────────────────────────────────
+    Route::post('/ticket-replies', [TicketReplyController::class, 'store'])->name('ticket-replies.store');
+
 });
 
 require __DIR__.'/auth.php';
