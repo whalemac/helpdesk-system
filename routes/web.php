@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,supervisor')->prefix('reports')->name('reports.')->group(function () {
         Route::get('/',           [App\Http\Controllers\ReportController::class, 'index'])->name('index');
         Route::get('/export-pdf', [App\Http\Controllers\ReportController::class, 'exportPdf'])->name('export-pdf');
+        Route::get('/export-csv', [App\Http\Controllers\ReportController::class, 'exportCsv'])->name('export-csv');
     });
 
     // ── Admin: System Settings ────────────────────────────────────────────────

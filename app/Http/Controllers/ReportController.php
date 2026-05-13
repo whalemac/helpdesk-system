@@ -82,4 +82,63 @@ class ReportController extends Controller
 
         return $pdf->download('helpdesk-report-' . now()->format('Y-m-d') . '.pdf');
     }
+
+    public function exportCsv(Request $request)
+    {
+        if (!in_array(auth()->user()->role, ['admin', 'supervisor'])) {
+            abort(403);
+        }
+
+        $query = Ticket::with(['requester', 'category', 'assignedUser']);
+        if ($request->date_from) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->date_to) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $tickets = $query->latest()->get();
+
+        $filename = "helpdesk-report-" . now()->format('Y-m-d') . ".csv";
+        $headers = array(
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        );
+
+        $columns = array('Ticket ID', 'Subject', 'Requester', 'Category', 'Priority', 'Status', 'Assigned To', 'Created At');
+
+        $callback = function() use($tickets, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($tickets as $ticket) {
+                $row['Ticket ID']   = $ticket->id;
+                $row['Subject']     = $ticket->subject;
+                $row['Requester']   = ($ticket->requester->first_name ?? '—') . ' ' . ($ticket->requester->last_name ?? '');
+                $row['Category']    = $ticket->category->name ?? 'N/A';
+                $row['Priority']    = strtoupper($ticket->priority);
+                $row['Status']      = strtoupper(str_replace('_', ' ', $ticket->status));
+                $row['Assigned To'] = $ticket->assignedUser->name ?? 'Unassigned';
+                $row['Created At']  = $ticket->created_at->format('Y-m-d H:i');
+
+                fputcsv($file, array(
+                    $row['Ticket ID'],
+                    $row['Subject'],
+                    $row['Requester'],
+                    $row['Category'],
+                    $row['Priority'],
+                    $row['Status'],
+                    $row['Assigned To'],
+                    $row['Created At']
+                ));
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }
